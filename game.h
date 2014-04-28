@@ -6,7 +6,7 @@
 
 using namespace std;
 
-void startGame(bool, vector < vector <int> > :: iterator, int&, int&);
+void startGame(bool, vector < vector <int> > :: iterator , int&, int&);
 
 //void gameIsOver(HWND, vector < vector <int> > :: iterator, int&, int&);
 

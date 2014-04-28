@@ -10,10 +10,21 @@ void drawBoard(HWND, int);
 
 char szWinName[] = "MyWin";
 
+int num_w, num_b;
+
+vector < vector < int > > checkers;
+
 //int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hPrevInst, LPSTR lpszArgs, int nWinMode)
 
 int main()
 {
+	checkers.resize(8);
+	for ( int i = 0; i < 8; ++i){
+		checkers[i].resize(8);
+	}
+
+	startGame ( true, checkers.begin(), num_w, num_b);
+
 	HWND hWnd;
 	MSG msg;
 	WNDCLASS wcl;
@@ -68,13 +79,14 @@ LRESULT CALLBACK MyFunc(HWND hwnd,UINT message, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(hwnd, message, wParam, lParam);
 }
 
-void drawBoard(HWND hwnd, int x) // рисует доску размером х*х
+void drawBoard(HWND hwnd, int a) 			// рисует доску размером х*х
 {
-	const int h = x / 8;
-	const int d = 10; // отступ от верхнего левого угла
+	const int h = a / 8;
+	const int d = 10;						// отступ от верхнего левого угла
+
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(hwnd, &ps);
-	RECT r; //объявляем экзмепляр структуры RECT - координаты прямоугольника.
+	RECT r; 								//объявляем экзмепляр структуры RECT - координаты прямоугольника.
 	
 	for ( int i = 0; i < 8; ++i)
 	{
@@ -86,7 +98,39 @@ void drawBoard(HWND hwnd, int x) // рисует доску размером х*
 				r.top = d + h * j; 
 				r.right = d + h * (i + 1) ; 
 				r.bottom = d + h * (j + 1) ;
-				FillRect(hdc, &r, (HBRUSH)CreateSolidBrush(RGB(0,0,0)));
+				FillRect(hdc, &r, (HBRUSH)CreateSolidBrush( RGB ( 50, 50, 50 ) ) );
+			}
+		}
+	}
+
+	HBRUSH brush_b, brush_w;
+	brush_w = CreateSolidBrush( RGB(255, 255, 255) ) ;
+	brush_b = CreateSolidBrush( RGB( 0, 0, 0) );
+
+	int x, y;
+
+
+	for ( int i = 0 ; i < 8; i++ )
+	{
+		for (int j = 0; j < 8; j++ ) 
+		{
+			cout<<checkers[2][3]<<endl;
+
+			if ( checkers[i][j] == 1 ) 
+			{
+				x =  j*h + d;
+				y =  i*h + d;
+
+				SelectObject (hdc, brush_w);
+				Ellipse ( hdc, x, y, x+h, y+h); 
+			}
+			else if( checkers[i][j] == 2 )
+			{
+				x =  j*h + d;
+				y =  i*h + d;
+				
+				SelectObject(hdc, brush_b);
+				Ellipse ( hdc, x, y, x+h, y+h); 
 			}
 		}
 	}
