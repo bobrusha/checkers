@@ -47,41 +47,43 @@ void startGame( const bool is_white, vector < vector < int > >& ch, int& kolvo_w
 }
 bool chooseChecker ( const int x, const int y0, vector <vector <int> > & ch){
 	int y = 7 - y0;
-	if ( ch[y][x] == 0 ){
-		cout<<" in if ! (ch) "<<endl;
-		return false;
+	if (ch[y][x] == 1){
+		x_prev = x;
+		y_prev = y;	
+		cout<<"I chose "<<x<<" "<<y<<endl;	
+		return true;
 	}
-
-	if ( (ch[y][x]) == enemy ){			
-		cout<<"in if ch == 2"<<endl;
-		return false;
-	}
-	x_prev = x;
-	y_prev =  y;	
-	cout<<"everytng ok"<<endl;	
-	return true;
+	return false;
 }
 
-bool makeStep ( const int x, const int y, vector <vector <int> >& ch ){
-		if (x < x_prev){
-			cout<<"because of x< x_prev"<<endl; 
+bool makeStep ( const int x, const int y0, vector <vector <int> >& ch ){
+		const int y = 7 -  y0;
+		if ( y < y_prev){
+			cout<<"because of "<< y<<"<"<<y_prev<<endl; 
 			return false;
 		}
 
-		if ( (ch[x][y]) == 2 ){
+		if ( (ch[y][x]) == enemy ){
 			cout<<"I did'nt make a step because of black!"<<x<<" "<< y<<endl;
 			return false;
 		}
-		ch[x][y] = 1;
 
+		if ( y - y_prev != 1 || ((x - x_prev) != 1 && (x-x_prev!= -1) ) ){
+			cout<< y<< " "<< y_prev<<" "<< x<<" "<<x_prev<<endl;
+			cout<<"I can't make step because of this condition"<<endl;
+			return false;
+		}
 
-		ch[x][y] = 0;
+		ch[y][x] = 1;
+		
+		ch[y_prev][x_prev] = 0;
 
 		cout<<"I maked a step!"<< x <<" "<< y << endl; 
 
 		x_prev = -1;
 		y_prev = -1;		
 
+	print(ch);
 	return true;
 }
 

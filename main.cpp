@@ -91,8 +91,6 @@ LRESULT CALLBACK MyFunc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_LBUTTONDOWN:
 	{
-		cout<<"I'm inside WM"<<endl;
-
 		int x = LOWORD(lParam);
 		int y = HIWORD(lParam);
 
@@ -103,13 +101,15 @@ LRESULT CALLBACK MyFunc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		if ( pos_y < 0 ) 
 			break;
 
-		is_choose = chooseChecker ( pos_x, pos_y, checkers);
-		 
 		if ( is_choose )
 		{
+			makeStep ( pos_x, pos_y, checkers );
+			is_choose = false;
 			InvalidateRect ( hwnd, NULL, 1);
+			break;
 		}
-		
+		is_choose = chooseChecker ( pos_x, pos_y, checkers);
+		InvalidateRect ( hwnd, NULL, 1);
 		break;
 	}
 	case WM_PAINT:
@@ -170,7 +170,6 @@ void drawBoard(HWND hwnd, int a, const bool is_choose, int& pos_x, int& pos_y) 	
 		{
 			if (pos_x == i && pos_y == j ){
 				if ( is_choose ){
-					cout<<"I'm here!!!!"<<endl;
 					r.left = d + (i) * H;
 					r.top = d + H * (j); 
 					r.right = d + H * (i + 1) ; 
