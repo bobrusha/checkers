@@ -103,7 +103,8 @@ LRESULT CALLBACK MyFunc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		if ( pos_y < 0 ) 
 			break;
 
-		is_choose = chooseChecker ( pos_x, pos_y, checkers); 
+		is_choose = chooseChecker ( pos_x, pos_y, checkers);
+		 
 		if ( is_choose )
 		{
 			InvalidateRect ( hwnd, NULL, 1);
@@ -128,9 +129,9 @@ void drawGreen (const int x, const int y, HWND hwnd){
 	const int H = 50;
 
 	r.left = d + x * H;
-	r.top = d + y * H; 
-	r.right = d + H * (x + 1) ; 
-	r.bottom = d + H * ( y + 1) ;
+	r.top = d + (7-y) * H; 
+	r.right = d + H * ( x + 1) ; 
+	r.bottom = d + H * ( 7 - y + 1) ;
 	cout<<r.left<<" "<<r.top<<" "<<r.right<<" "<<r.bottom<<endl;
 
 	FillRect ( hdc, &r, (HBRUSH)CreateSolidBrush( RGB ( 0, 255, 0 ) ) );
@@ -199,9 +200,9 @@ void drawBoard(HWND hwnd, int a, const bool is_choose, int& pos_x, int& pos_y) 	
 	int x, y;
 
 
-	for ( int i = 7 ; i >= 0; --i )
+	for ( int i = 0 ; i < 8 ; ++i )
 	{
-		for (int j = 7; j >= 0; --j ) 
+		for (int j = 0; j < 8; ++j ) 
 		{
 			if ( checkers[i][j] == 1 ) 
 			{
@@ -211,10 +212,10 @@ void drawBoard(HWND hwnd, int a, const bool is_choose, int& pos_x, int& pos_y) 	
 				SelectObject (hdc, brush_w);
 				Ellipse ( hdc, x, y, x+H, y+H); 
 			}
-			else if( checkers[j][i] == 2 )
+			else if( checkers[i][j] == 2 )
 			{
-				x =  (i)*H + d;
-				y =  (j)*H + d;
+				x =  (j)*H + d;
+				y =  (7-i)*H + d;
 				
 				SelectObject(hdc, brush_b);
 				Ellipse ( hdc, x, y, x+H, y+H); 
@@ -242,13 +243,14 @@ int fromCoordinateToPosy ( const int x )						// возвращает -1 есл�
 {
 	int pos = -1;
 	for ( int i = 0; i < 8; ++i){
-		if ( x <= 10 + H * (7 - i + 1) && x >= 10 + H * (7- i) ){
-			pos = i;
+		if ( x <= 10 + H * (7 - i + 1) && x >= 10 + H * (7-i) ){
+			pos =  7-i;
 			break;
 		}
 	}
 	return pos;
 }
+
 void showConsole(){
 	BOOL f = AllocConsole();
 	freopen("CONIN$", "r", stdin);
