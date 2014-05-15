@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <winsock2.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstdio>
@@ -21,6 +22,7 @@ char szWinName[] = "MyWin";
 int H;
 vector < vector < int > > checkers;
 int condition;
+int cond;
 
 int main()
 {
@@ -31,9 +33,6 @@ int main()
 	for ( int i = 0; i < 8; ++i){
 		checkers[i].resize(8);
 	}
-
-
-	startGame ( true, checkers, condition);
 
 	HWND hWnd;
 	MSG msg;
@@ -51,7 +50,6 @@ int main()
 
 	if(!RegisterClass(&wcl)) return 0;
 
-	// MSDN.microsoft.com/ 
 	hWnd = CreateWindow(
 		"MyWindow",
 		"Checkers", 
@@ -66,17 +64,83 @@ int main()
 	UpdateWindow(hWnd);
 	RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ERASE );
 
+	WSADATA ws;
+ 	int error;
+
+ 	WORD wVersionRequeested = MAKEWORD(2,2);
+ 	if (FAILED ( WSAStartup ( wVersionRequeested, &ws) ) ) 
+   	{
+   		printf("WSAStartup faild with error:%d\n",error);
+   		error = WSAGetLastError();
+   	}
+
+   	SOCKET s;
+   	s = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
+   	if ( s == INVALID_SOCKET )
+   	{
+		printf( "Error at socket():%ld\n", WSAGetLastError() );
+		WSACleanup();
+		return 1;
+	}
+
+	sockaddr_in clientService;
+	clientService.sin_family = AF_INET;			//IP adress family
+	clientService.sin_port = htons(27016);		//port
+	clientService.sin_addr.s_addr = inet_addr("127.0.0.1");//IP
+
+   // Дальше выполняем соединение:
+	if (SOCKET_ERROR == ( connect (s, (sockaddr *) &clientService, sizeof (clientService) ) ) )
+	{
+		printf("Failed to connect.\n");
+		closesocket(s);
+		error = WSAGetLastError();
+		WSACleanup();
+		return 2;
+	}
+	printf("Connect to server \n");
+
+	int iResult;
+	char color[1];
+
+	iResult = recv( s, color, 1, 0);
+	while (true){
+		if ( iResult > 0){
+			if ( color[0] == 1 ){
+				startGame ( true, checkers, condition);
+				cout<<"My color is white"<<endl;
+			}
+			else {
+				startGame ( false, checkers, condition);
+				cout<<"My color is black"<<endl;
+			}
+			break;
+		}
+	}	
+	
+	const int buflen = 64;
+	
+	char recvbuf [buflen];
+	char sendbuf [buflen];
+	
 	while(GetMessage(&msg, NULL, 0, 0))
 	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		TranslateMessage ( &msg );
+		DispatchMessage ( &msg );
+		/*
+		if (cond == 2){
+			iResult = recv( s, recvbuf, buflen, 0);
+			if ( iResult > 0 ){
+				printf("Bytes received:%d\n",iResult);
+				printf("Result: %d\n",recvbuf[0]);
+			}
+			else if ( iResult == 0 )
+				printf("Connection closed\n");
+			else
+            	printf("recv failed: %d\n", WSAGetLastError());
+    	}
+    	*/
 	}
-	/*
-	for(int i=0; i<8; ++i){
-		checkers[i].erase();
-	}
-	checkers.erase();
-	*/
+	
 	system("pause");
 	return msg.wParam;
 }
@@ -88,14 +152,6 @@ LRESULT CALLBACK MyFunc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {	
 	switch(message) 
 	{
-	case WM_CREATE:
-		hdc = GetDC(hwnd); 
-        GetTextMetrics(hdc, &tm); 
-        ReleaseDC(hwnd, hdc);  
- 
-        dwCharX = tm.tmAveCharWidth; 
-        dwCharY = tm.tmHeight; 
-        return 0;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
@@ -124,16 +180,17 @@ LRESULT CALLBACK MyFunc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 	}
 	case WM_PAINT:
-		if ( condition > 0 ){
+		//if ( condition > 0 ){
 			drawBoard(hwnd, 400, is_choose, pos_x, pos_y);
-		}else if( condition == 0 ){
+		//}
+		/*else if( condition == 0 )
+		{
 			PAINTSTRUCT ps;
 			HDC hdc = BeginPaint(hwnd, &ps);
 			TextOut ( hdc, 200, 190, "Write ip: ", 10);
 			EndPaint ( hwnd, &ps );			
 		}
-		break;
-	case WM_KEYBUTTONDOWN:
+		*/
 		break;
 	} 
 

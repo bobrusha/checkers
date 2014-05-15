@@ -8,15 +8,15 @@ int enemy;
 //------------------------
 
 void startGame( const bool is_white, vector < vector < int > >& ch, int& cond){
+	cond = 1;
+
 	if ( is_white ) 
 	{
-		cond = 1;
 		
 		enemy = 2;
 		for (int i = 0; i < 3; ++i ) 
 		{
 			for (int j = 0; j < 8;  ++j){
-				cout<< i%2<<" "<<j%2<<endl;
 				if ( (i%2!=0 && j%2 !=0) || (( i%2 == 0 ) && ( j%2 == 0 ))) {
 					ch[i][j] = 1;
 				}
@@ -36,6 +36,33 @@ void startGame( const bool is_white, vector < vector < int > >& ch, int& cond){
 			for (int j = 0; j < 8;  ++j){
 				if ((i%2 && j%2 || !(i%2) && !(j%2)))
 					ch[i][j] = 2;
+				else ch[i][j] = 0;
+			}
+		}
+	}
+	else{
+		for (int i = 0; i < 3; ++i ) 
+		{
+			for (int j = 0; j < 8;  ++j){
+				if ( (i%2!=0 && j%2 !=0) || (( i%2 == 0 ) && ( j%2 == 0 ))) {
+					ch[i][j] = 2;
+				}
+				else {
+					ch[i][j] = 0;
+				}
+			}
+		}
+
+		for (int i = 3; i < 5; ++i){
+			for (int j = 0; j < 8;  ++j){
+				ch[i][j] = 0;
+			}
+		}
+
+		for (int i = 5; i < 8; ++i){
+			for (int j = 0; j < 8;  ++j){
+				if ((i%2 && j%2 || !(i%2) && !(j%2)))
+					ch[i][j] = 1;
 				else ch[i][j] = 0;
 			}
 		}
