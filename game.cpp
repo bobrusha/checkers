@@ -1,16 +1,17 @@
 #include "game.h"
 
+bool is_white = true;
+bool can_make_step = true;
+int num_w = 12, num_b = 12;
 int x_prev, y_prev;
 int enemy;
 //------------------------
 
-void startGame( const bool is_white, vector < vector < int > >& ch, int& kolvo_wh, int& kolvo_bk ){
-	kolvo_wh = 12;
-	kolvo_bk = 12;
-
-	
+void startGame( const bool is_white, vector < vector < int > >& ch, int& cond){
 	if ( is_white ) 
 	{
+		cond = 1;
+		
 		enemy = 2;
 		for (int i = 0; i < 3; ++i ) 
 		{
@@ -57,32 +58,45 @@ bool chooseChecker ( const int x, const int y0, vector <vector <int> > & ch){
 }
 
 bool makeStep ( const int x, const int y0, vector <vector <int> >& ch ){
-		const int y = 7 -  y0;
-		if ( y < y_prev){
-			cout<<"because of "<< y<<"<"<<y_prev<<endl; 
-			return false;
-		}
+	cout<<"I'm trying make step"<<endl;
+	if (! can_make_step) 
+		return false;
+	const int y = 7 -  y0;
+	
+	if ( y < y_prev){ 
+		return false;
+	}
 
-		if ( (ch[y][x]) == enemy ){
-			cout<<"I did'nt make a step because of black!"<<x<<" "<< y<<endl;
-			return false;
-		}
-
-		if ( y - y_prev != 1 || ((x - x_prev) != 1 && (x-x_prev!= -1) ) ){
-			cout<< y<< " "<< y_prev<<" "<< x<<" "<<x_prev<<endl;
-			cout<<"I can't make step because of this condition"<<endl;
-			return false;
-		}
-
+	if ( (ch[y][x]) != 0 ){
+		return false;
+	}
+	
+	if ( y - y_prev == 2 && (x - x_prev == -2 || x - x_prev == 2)){
+		if ( ch [y-1][x-1] != enemy ) return false;
+		ch[y-1][x-1] = 0;
+		if ( is_white )
+			--num_b;
+		else 
+			--num_w;
 		ch[y][x] = 1;
-		
 		ch[y_prev][x_prev] = 0;
+		return true;
+	}
+	
 
-		cout<<"I maked a step!"<< x <<" "<< y << endl; 
+	if ( y - y_prev != 1 || ((x - x_prev) != 1 && (x-x_prev!= -1) ) ){
+		cout<< y<< " "<< y_prev<<" "<< x<<" "<<x_prev<<endl;
+		return false;
+	}
 
-		x_prev = -1;
-		y_prev = -1;		
+	ch[y][x] = 1;
+	
+	ch[y_prev][x_prev] = 0;
 
+	can_make_step = true; //должен изменяться при ходе
+
+	x_prev = -1;
+	y_prev = -1;		
 	print(ch);
 	return true;
 }

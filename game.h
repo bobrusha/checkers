@@ -6,7 +6,7 @@
 
 using namespace std;
 
-void startGame ( const bool, vector < vector <int> >& , int&, int& );
+void startGame ( const bool, vector < vector <int> >&, int& );
 
 bool chooseChecker (const int , const int, vector <vector <int> > & );
 bool makeStep ( const int , const int, vector < vector <int> > & );

@@ -3,8 +3,10 @@
 #include <stdlib.h>
 #include <cstdio>
 
-
 #include "game.h"
+
+#define ID_EDIT 1001
+#define ID_BUTTON 1002
 
 LRESULT CALLBACK MyFunc(HWND, UINT, WPARAM, LPARAM);
 void showConsole();
@@ -16,26 +18,27 @@ int fromCoordinateToPosy ( const int );
 
 char szWinName[] = "MyWin";
 
-int num_w, num_b;
 int H;
 vector < vector < int > > checkers;
+int condition;
 
 int main()
 {
 	showConsole();
 	printf("I began \n");
-	
+		
 	checkers.resize(8);
 	for ( int i = 0; i < 8; ++i){
 		checkers[i].resize(8);
 	}
 
-	startGame ( true, checkers, num_w, num_b);
+
+	startGame ( true, checkers, condition);
 
 	HWND hWnd;
 	MSG msg;
 	WNDCLASS wcl;
-	memset(&wcl, 0, sizeof(WNDCLASS));
+	memset ( &wcl, 0, sizeof(WNDCLASS));
 
 	HWND hButton1, hButton2;
 
@@ -61,13 +64,12 @@ int main()
 
 	ShowWindow(hWnd, SW_SHOW /*nWinMode*/);
 	UpdateWindow(hWnd);
-	RedrawWindow(hWnd,NULL,NULL, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ERASE );
+	RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ERASE );
 
 	while(GetMessage(&msg, NULL, 0, 0))
 	{
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
-		//UpdateWindow(hWnd);
 	}
 	/*
 	for(int i=0; i<8; ++i){
@@ -83,39 +85,57 @@ int pos_x = -1, pos_y = -1;
 bool is_choose = false;
 
 LRESULT CALLBACK MyFunc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
+{	
 	switch(message) 
 	{
+	case WM_CREATE:
+		hdc = GetDC(hwnd); 
+        GetTextMetrics(hdc, &tm); 
+        ReleaseDC(hwnd, hdc);  
+ 
+        dwCharX = tm.tmAveCharWidth; 
+        dwCharY = tm.tmHeight; 
+        return 0;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
 	case WM_LBUTTONDOWN:
 	{
-		int x = LOWORD(lParam);
-		int y = HIWORD(lParam);
+		if ( condition > 0){
+			int x = LOWORD(lParam);
+			int y = HIWORD(lParam);
 
-		pos_x = fromCoordinateToPosx(x);
-		if ( pos_x < 0 ) 
-			break;
-		pos_y = fromCoordinateToPosy(y);
-		if ( pos_y < 0 ) 
-			break;
-
-		if ( is_choose )
-		{
-			makeStep ( pos_x, pos_y, checkers );
-			is_choose = false;
+			pos_x = fromCoordinateToPosx(x);
+			if ( pos_x < 0 ) 
+				break;
+			pos_y = fromCoordinateToPosy(y);
+			if ( pos_y < 0 ) 
+				break;
+			if ( is_choose )
+			{
+				makeStep ( pos_x, pos_y, checkers );
+				is_choose = false;
+				InvalidateRect ( hwnd, NULL, 1);
+				break;
+			}
+			is_choose = chooseChecker ( pos_x, pos_y, checkers);
 			InvalidateRect ( hwnd, NULL, 1);
 			break;
 		}
-		is_choose = chooseChecker ( pos_x, pos_y, checkers);
-		InvalidateRect ( hwnd, NULL, 1);
-		break;
 	}
 	case WM_PAINT:
-		drawBoard(hwnd, 400, is_choose, pos_x, pos_y);
+		if ( condition > 0 ){
+			drawBoard(hwnd, 400, is_choose, pos_x, pos_y);
+		}else if( condition == 0 ){
+			PAINTSTRUCT ps;
+			HDC hdc = BeginPaint(hwnd, &ps);
+			TextOut ( hdc, 200, 190, "Write ip: ", 10);
+			EndPaint ( hwnd, &ps );			
+		}
 		break;
-	}
+	case WM_KEYBUTTONDOWN:
+		break;
+	} 
 
 	return DefWindowProc(hwnd, message, wParam, lParam);
 }
@@ -176,8 +196,8 @@ void drawBoard(HWND hwnd, int a, const bool is_choose, int& pos_x, int& pos_y) 	
 					r.bottom = d + H * (j+1) ;
 					FillRect(hdc, &r, (HBRUSH)CreateSolidBrush( RGB ( 0, 250, 0 ) ) );
 					pos_x = pos_y = -1;
+					continue;
 				}
-				continue;
 			}
 
 			if (!(i%2 && j%2 || !(i%2) && !(j%2)))
