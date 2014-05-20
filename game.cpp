@@ -7,12 +7,12 @@ int x_prev, y_prev;
 int enemy;
 //------------------------
 
-void startGame( const bool is_white, vector < vector < int > >& ch, int& cond){
+void startGame( const bool is_white, vector < vector < int > >& ch, int& cond, bool& must_to_make_step){
 	cond = 1;
 
 	if ( is_white ) 
 	{
-		
+		must_to_make_step = true;
 		enemy = 2;
 		for (int i = 0; i < 3; ++i ) 
 		{
@@ -41,6 +41,7 @@ void startGame( const bool is_white, vector < vector < int > >& ch, int& cond){
 		}
 	}
 	else{
+		must_to_make_step = false;
 		for (int i = 0; i < 3; ++i ) 
 		{
 			for (int j = 0; j < 8;  ++j){

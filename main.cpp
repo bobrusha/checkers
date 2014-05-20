@@ -24,6 +24,9 @@ vector < vector < int > > checkers;
 int condition;
 int cond;
 
+bool must_to_make_step;
+
+SOCKET s;
 int main()
 {
 	showConsole();
@@ -74,7 +77,6 @@ int main()
    		error = WSAGetLastError();
    	}
 
-   	SOCKET s;
    	s = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
    	if ( s == INVALID_SOCKET )
    	{
@@ -106,38 +108,22 @@ int main()
 	while (true){
 		if ( iResult > 0){
 			if ( color[0] == 1 ){
-				startGame ( true, checkers, condition);
+				startGame ( true, checkers, condition, must_to_make_step);
 				cout<<"My color is white"<<endl;
 			}
 			else {
-				startGame ( false, checkers, condition);
+				startGame ( false, checkers, condition, must_to_make_step);
 				cout<<"My color is black"<<endl;
 			}
 			break;
 		}
 	}	
-	
-	const int buflen = 64;
-	
-	char recvbuf [buflen];
-	char sendbuf [buflen];
-	
+
 	while(GetMessage(&msg, NULL, 0, 0))
 	{
 		TranslateMessage ( &msg );
 		DispatchMessage ( &msg );
 		/*
-		if (cond == 2){
-			iResult = recv( s, recvbuf, buflen, 0);
-			if ( iResult > 0 ){
-				printf("Bytes received:%d\n",iResult);
-				printf("Result: %d\n",recvbuf[0]);
-			}
-			else if ( iResult == 0 )
-				printf("Connection closed\n");
-			else
-            	printf("recv failed: %d\n", WSAGetLastError());
-    	}
     	*/
 	}
 	
@@ -157,7 +143,7 @@ LRESULT CALLBACK MyFunc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_LBUTTONDOWN:
 	{
-		if ( condition > 0){
+		if ( must_to_make_step){
 			int x = LOWORD(lParam);
 			int y = HIWORD(lParam);
 
@@ -169,10 +155,27 @@ LRESULT CALLBACK MyFunc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				break;
 			if ( is_choose )
 			{
-				makeStep ( pos_x, pos_y, checkers );
-				is_choose = false;
-				InvalidateRect ( hwnd, NULL, 1);
-				break;
+				if ( makeStep ( pos_x, pos_y, checkers ))
+				{
+					must_to_make_step = false;
+					const int buflen = 64;
+	
+					//char recvbuf [buflen];
+					char sendbuf [buflen];
+					sendbuf[0]=1;
+					sendbuf[1]=27;
+					int iResult = send( s, sendbuf, buflen, 0);
+					if ( iResult > 0 ){
+						printf("Bytes send:%d\n", iResult);
+					}
+					else{
+						printf("Error in if \n");
+					}
+
+					is_choose = false;
+					InvalidateRect ( hwnd, NULL, 1);
+					break;
+				}
 			}
 			is_choose = chooseChecker ( pos_x, pos_y, checkers);
 			InvalidateRect ( hwnd, NULL, 1);

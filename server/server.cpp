@@ -133,6 +133,7 @@ int main()
 		{
 			iResult = recv( AcceptSocket1, buf_recv, buflen_recv, 0);
 			if ( iResult > 0){
+				printf("Bytes received: %d \n", iResult);
 				iResult = send ( AcceptSocket2, buf_recv, buflen_recv, 0 );
 				if ( iResult == SOCKET_ERROR)
 					printf("send() failed  with error %d\n", WSAGetLastError());
@@ -154,21 +155,19 @@ int main()
 				}
 			}
 		}
-
-		iResult = shutdown ( AcceptSocket2, SD_SEND );
+	}
+	iResult = shutdown ( AcceptSocket2, SD_SEND );
 		
-		if (iResult == SOCKET_ERROR){
-			printf("shutdown failed: %d\n", WSAGetLastError());
-			closesocket(AcceptSocket1);
-			closesocket(AcceptSocket2);
-			WSACleanup();
-			return 6;	
-		}
+	if (iResult == SOCKET_ERROR){
+		printf("shutdown failed: %d\n", WSAGetLastError());
 		closesocket(AcceptSocket1);
 		closesocket(AcceptSocket2);
-		break;
+		WSACleanup();
+		return 6;	
 	}
-
+	closesocket(AcceptSocket1);
+	closesocket(AcceptSocket2);
+	
 	closesocket(s);
 	
 	WSACleanup();
